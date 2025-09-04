@@ -1,0 +1,35 @@
+{
+  "name": "insight-weaver-workers",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers backend for Insight Weaver",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "setup": "wrangler d1 create insight-weaver-db",
+    "db:migrate": "wrangler d1 migrations apply insight-weaver-db",
+    "db:local": "wrangler d1 migrations apply insight-weaver-db --local",
+    "generate:migration": "wrangler d1 migrations create insight-weaver-db"
+  },
+  "dependencies": {
+    "@cloudflare/ai": "^1.0.59",
+    "hono": "^4.5.8",
+    "node-html-parser": "^6.1.13",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "@types/node": "^20.14.15",
+    "typescript": "^5.2.2",
+    "wrangler": "^3.72.0"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "rss",
+    "ai",
+    "geopolitical"
+  ],
+  "author": "Alessandro Nurnberg",
+  "license": "MIT"
+}

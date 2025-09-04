@@ -1,0 +1,25 @@
+{
+  "name": "insight-weaver",
+  "version": "1.0.0",
+  "description": "A geopolitical analysis and publishing tool",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "workers"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "deploy": "npm run deploy --workspace=workers",
+    "setup": "npm install && npm run setup --workspace=workers"
+  },
+  "keywords": [
+    "geopolitical",
+    "analysis",
+    "cloudflare",
+    "rss",
+    "ai"
+  ],
+  "author": "Alessandro Nurnberg",
+  "license": "MIT"
+}

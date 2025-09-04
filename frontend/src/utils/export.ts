@@ -1,0 +1,319 @@
+// Export utility functions for reports
+
+import { WorkspaceItem, Article, Report } from '../types'
+
+export function generateHTML(
+  report: Report,
+  items: WorkspaceItem[],
+  articles: Article[]
+): string {
+  const sortedItems = [...items].sort((a, b) => a.order - b.order)
+  
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${report.title}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #fff;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        .section {
+            margin-bottom: 40px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 20px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .section-number {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        .section-meta {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+        .summary-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .summary-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        .analysis-box {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .analysis-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 5px;
+        }
+        .content {
+            color: #374151;
+            line-height: 1.7;
+        }
+        .source {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 15px;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .footer {
+            border-top: 2px solid #e5e7eb;
+            padding-top: 20px;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">${report.title}</h1>
+        <p class="subtitle">Generated on ${new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })} • ${items.length} articles</p>
+    </div>
+
+    ${sortedItems.map((item, index) => {
+      const article = articles.find(a => a.id === item.articleId)
+      if (!article) return ''
+
+      return `
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">${index + 1}</div>
+                <h2 class="section-title">${article.title}</h2>
+            </div>
+            <div class="section-meta">
+                ${article.category} • ${new Date(article.publishedAt).toLocaleDateString()}
+            </div>
+
+            ${article.summary ? `
+                <div class="summary-box">
+                    <div class="summary-label">Key Points:</div>
+                    <div class="content">${article.summary}</div>
+                </div>
+            ` : ''}
+
+            <div class="content">
+                ${(item.customContent || article.content).replace(/\n/g, '<br>')}
+            </div>
+
+            ${item.customAnalysis ? `
+                <div class="analysis-box">
+                    <div class="analysis-label">Expert Assessment:</div>
+                    <div class="content">${item.customAnalysis.replace(/\n/g, '<br>')}</div>
+                </div>
+            ` : ''}
+
+            <div class="source">
+                Source: <a href="${article.url}" target="_blank">${new URL(article.url).hostname}</a>
+            </div>
+        </div>
+      `
+    }).join('')}
+
+    <div class="footer">
+        <p>This report was generated by Insight Weaver on ${new Date().toLocaleDateString()}</p>
+        <p>For questions or additional analysis, please contact the research team.</p>
+    </div>
+</body>
+</html>`
+
+  return html.trim()
+}
+
+export function generateMarkdown(
+  report: Report,
+  items: WorkspaceItem[],
+  articles: Article[]
+): string {
+  const sortedItems = [...items].sort((a, b) => a.order - b.order)
+  
+  let markdown = `# ${report.title}\n\n`
+  markdown += `*Generated on ${new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })} • ${items.length} articles*\n\n`
+
+  markdown += `## Executive Summary\n\n`
+  markdown += `This report presents analysis of ${items.length} key developments in geopolitical affairs, drawing from authoritative sources and expert commentary. The analysis covers recent policy statements, diplomatic initiatives, and strategic developments that may impact regional stability and international relations.\n\n`
+
+  sortedItems.forEach((item, index) => {
+    const article = articles.find(a => a.id === item.articleId)
+    if (!article) return
+
+    markdown += `## ${index + 1}. ${article.title}\n\n`
+    markdown += `*${article.category} • ${new Date(article.publishedAt).toLocaleDateString()}*\n\n`
+
+    if (article.summary) {
+      markdown += `### Key Points:\n\n${article.summary}\n\n`
+    }
+
+    markdown += `### Analysis:\n\n${item.customContent || article.content}\n\n`
+
+    if (item.customAnalysis) {
+      markdown += `### Expert Assessment:\n\n${item.customAnalysis}\n\n`
+    }
+
+    markdown += `**Source:** [${new URL(article.url).hostname}](${article.url})\n\n---\n\n`
+  })
+
+  markdown += `*This report was generated by Insight Weaver on ${new Date().toLocaleDateString()}*\n`
+
+  return markdown
+}
+
+export function generateJSON(
+  report: Report,
+  items: WorkspaceItem[],
+  articles: Article[]
+): string {
+  const sortedItems = [...items].sort((a, b) => a.order - b.order)
+  
+  const data = {
+    report: {
+      id: report.id,
+      title: report.title,
+      description: report.description,
+      status: report.status,
+      createdAt: report.createdAt,
+      updatedAt: report.updatedAt,
+      exportedAt: new Date().toISOString(),
+    },
+    items: sortedItems.map((item, index) => {
+      const article = articles.find(a => a.id === item.articleId)
+      return {
+        order: index + 1,
+        article: article ? {
+          id: article.id,
+          title: article.title,
+          category: article.category,
+          publishedAt: article.publishedAt,
+          url: article.url,
+          summary: article.summary,
+          content: item.customContent || article.content,
+          analysis: item.customAnalysis,
+        } : null,
+        isEdited: item.isEdited,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }
+    }).filter(item => item.article !== null),
+    metadata: {
+      totalItems: items.length,
+      exportFormat: 'json',
+      generatedBy: 'Insight Weaver',
+    }
+  }
+
+  return JSON.stringify(data, null, 2)
+}
+
+export function generateCSV(
+  report: Report,
+  items: WorkspaceItem[],
+  articles: Article[]
+): string {
+  const sortedItems = [...items].sort((a, b) => a.order - b.order)
+  
+  // CSV Headers
+  const headers = [
+    'Order',
+    'Title',
+    'Category',
+    'Published Date',
+    'URL',
+    'Summary',
+    'Content',
+    'Analysis',
+    'Is Edited'
+  ]
+
+  const rows = sortedItems.map((item, index) => {
+    const article = articles.find(a => a.id === item.articleId)
+    if (!article) return null
+
+    return [
+      index + 1,
+      `"${article.title.replace(/"/g, '""')}"`,
+      `"${article.category || ''}"`,
+      new Date(article.publishedAt).toLocaleDateString(),
+      article.url,
+      `"${(article.summary || '').replace(/"/g, '""')}"`,
+      `"${(item.customContent || article.content).replace(/"/g, '""')}"`,
+      `"${(item.customAnalysis || '').replace(/"/g, '""')}"`,
+      item.isEdited ? 'Yes' : 'No'
+    ].join(',')
+  }).filter(Boolean)
+
+  return [headers.join(','), ...rows].join('\n')
+}
+
+export function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
